@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双拼打字练习</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f0f2f5;
+  color: #1e293b;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 20px; }
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 24px 0 16px;
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 2px;
+}
+.header .subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Control Panel */
+.control-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+}
+.control-group { display: flex; align-items: center; gap: 6px; }
+.control-group label { font-size: 13px; color: #64748b; font-weight: 500; white-space: nowrap; }
+.control-group select {
+  padding: 6px 28px 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f8fafc;
+  color: #1e293b;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.control-group select:focus { outline: none; border-color: #4361ee; box-shadow: 0 0 0 2px rgba(67,97,238,0.15); }
+
+/* Stats Bar */
+.stats-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px 20px;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+.stat-value { font-size: 26px; font-weight: 700; color: #1e293b; }
+.stat-label { font-size: 12px; color: #64748b; margin-top: 2px; }
+.stat-card.accent .stat-value { color: #4361ee; }
+.stat-card.success .stat-value { color: #22c55e; }
+
+/* Practice Area */
+.practice-area {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 32px 24px;
+  margin-bottom: 16px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Character Display */
+.char-display {
+  font-size: 72px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  line-height: 1;
+  transition: color 0.15s;
+  user-select: none;
+}
+.char-display.correct { color: #22c55e; }
+.char-display.wrong { color: #ef4444; }
+
+.pinyin-display {
+  font-size: 20px;
+  color: #64748b;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+  user-select: none;
+}
+
+/* Word display for multi-char practice */
+.word-progress {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.word-char {
+  font-size: 40px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  user-select: none;
+}
+.word-char.current { color: #4361ee; background: #eef0ff; }
+.word-char.done { color: #22c55e; }
+.word-char.error { color: #ef4444; background: #fef2f2; }
+
+/* Typed keys display */
+.typed-keys {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+  min-height: 40px;
+}
+.key-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: "SF Mono", "Courier New", monospace;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+  transition: all 0.15s;
+}
+.key-badge.active { background: #eef0ff; border-color: #4361ee; color: #4361ee; }
+.key-badge.correct { background: #f0fdf4; border-color: #22c55e; color: #22c55e; }
+.key-badge.wrong { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
+
+.hint-text {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+/* Word pinyin display */
+.current-pinyin {
+  font-size: 16px;
+  color: #4361ee;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+/* Feedback message */
+.feedback {
+  font-size: 15px;
+  font-weight: 500;
+  min-height: 24px;
+  margin-top: 4px;
+}
+.feedback.correct { color: #22c55e; }
+.feedback.wrong { color: #ef4444; }
+
+/* Buttons */
+.btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: #4361ee; color: #fff; }
+.btn-primary:hover { background: #3b56d4; }
+.btn-outline { background: #fff; color: #4361ee; border: 1px solid #4361ee; }
+.btn-outline:hover { background: #eef0ff; }
+.btn-sm { padding: 5px 14px; font-size: 13px; }
+
+/* Keyboard */
+.keyboard-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+}
+.keyboard-title {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.key-row {
+  display: flex;
+  gap: 4px;
+}
+.key {
+  min-width: 36px;
+  height: 42px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  cursor: default;
+  user-select: none;
+  position: relative;
+}
+.key .key-main { font-size: 13px; font-weight: 600; color: #334155; }
+.key .key-sp { font-size: 10px; color: #94a3b8; line-height: 1; }
+.key.sp-init { background: #eef0ff; border-color: #c7d2fe; }
+.key.sp-init .key-sp { color: #4361ee; font-weight: 600; }
+.key.sp-final { background: #fefce8; border-color: #fde68a; }
+.key.sp-final .key-sp { color: #ca8a04; font-weight: 600; }
+.key.sp-both { background: #f0fdf4; border-color: #bbf7d0; }
+.key.sp-both .key-sp { color: #16a34a; font-weight: 600; }
+.key.highlight-init { background: #4361ee; border-color: #4361ee; }
+.key.highlight-init .key-main,
+.key.highlight-init .key-sp { color: #fff; }
+.key.highlight-final { background: #eab308; border-color: #eab308; }
+.key.highlight-final .key-main,
+.key.highlight-final .key-sp { color: #fff; }
+.key.highlight-correct { background: #22c55e; border-color: #22c55e; }
+.key.highlight-correct .key-main,
+.key.highlight-correct .key-sp { color: #fff; }
+.key.highlight-wrong { background: #ef4444; border-color: #ef4444; }
+.key.highlight-wrong .key-main,
+.key.highlight-wrong .key-sp { color: #fff; }
+.key-wide { min-width: 54px; }
+.key-xwide { min-width: 62px; }
+
+/* Scheme reference */
+.scheme-ref {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  display: none;
+}
+.scheme-ref.show { display: block; }
+.scheme-ref h3 { font-size: 15px; margin-bottom: 12px; color: #1e293b; }
+.scheme-tables { display: flex; gap: 24px; flex-wrap: wrap; }
+.scheme-table { flex: 1; min-width: 280px; }
+.scheme-table h4 { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+.scheme-table table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.scheme-table td {
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+.scheme-table td.sp-cell { background: #f1f5f9; font-weight: 600; color: #4361ee; }
+
+/* Progress bar */
+.progress-wrap {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #4361ee;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.progress-text { font-size: 13px; color: #64748b; white-space: nowrap; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container { padding: 12px; }
+  .header h1 { font-size: 22px; }
+  .char-display { font-size: 52px; }
+  .stats-bar { gap: 8px; }
+  .stat-card { padding: 10px 14px; }
+  .stat-value { font-size: 22px; }
+  .control-panel { padding: 12px; }
+  .keyboard { transform: scale(0.85); transform-origin: top center; }
+  .key { min-width: 28px; height: 36px; font-size: 10px; }
+  .key .key-main { font-size: 11px; }
+  .key .key-sp { font-size: 9px; }
+  .key-wide { min-width: 42px; }
+  .key-xwide { min-width: 50px; }
+}
+
+@media (max-width: 480px) {
+  .char-display { font-size: 40px; }
+  .word-char { font-size: 28px; }
+  .key-badge { width: 30px; height: 30px; font-size: 15px; }
+  .stats-bar { flex-wrap: wrap; }
+  .stat-card { min-width: 80px; flex: 1 1 40%; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>⌨ 双拼打字练习</h1>
+    <p class="subtitle">掌握双拼输入法，提升中文打字速度</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="control-panel">
+    <div class="control-group">
+      <label>双拼方案</label>
+      <select id="schemeSelect">
+        <option value="xiaohe">小鹤双拼</option>
+        <option value="ziranma">自然码</option>
+        <option value="microsoft">微软双拼</option>
+        <option value="sogou">搜狗双拼</option>
+        <option value="pinyinjj">拼音加加</option>
+        <option value="zhinengabc">智能ABC</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>练习模式</label>
+      <select id="modeSelect">
+        <option value="char">单字练习</option>
+        <option value="word">词语练习</option>
+        <option value="sentence">句子练习</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>难度</label>
+      <select id="levelSelect">
+        <option value="easy">初级</option>
+        <option value="medium">中级</option>
+        <option value="hard">高级</option>
+      </select>
+    </div>
+    <button class="btn btn-outline btn-sm" id="toggleRef">方案对照表</button>
+    <button class="btn btn-primary btn-sm" id="restartBtn">重新开始</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card accent">
+      <div class="stat-value" id="accuracy">-</div>
+      <div class="stat-label">正确率</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="speed">-</div>
+      <div class="stat-label">字/分钟</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-value" id="combo">-</div>
+      <div class="stat-label">连续正确</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="totalTyped">0</div>
+      <div class="stat-label">已练习字数</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="progress-text" id="progressText">0 / 20</span>
+  </div>
+
+  <!-- Practice Area -->
+  <div class="practice-area" id="practiceArea">
+    <div id="wordProgress" class="word-progress"></div>
+    <div class="current-pinyin" id="currentPinyin"></div>
+    <div class="char-display" id="charDisplay">准备好了吗？</div>
+    <div class="pinyin-display" id="pinyinDisplay"></div>
+    <div class="typed-keys" id="typedKeys"></div>
+    <div class="hint-text" id="hintText">选择方案后按任意键开始</div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <!-- Keyboard -->
+  <div class="keyboard-section">
+    <div class="keyboard-title">键盘映射 — 当前方案：<strong id="keyboardSchemeName">小鹤双拼</strong></div>
+    <div class="keyboard" id="keyboard"></div>
+    <div style="margin-top:10px;display:flex;gap:16px;justify-content:center;font-size:12px;color:#64748b;">
+      <span><span style="display:inline-block;width:12px;height:12px;background:#eef0ff;border:1px solid #c7d2fe;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>声母键</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:#fefce8;border:1px solid #fde68a;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>韵母键</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>声韵双用</span>
+    </div>
+  </div>
+
+  <!-- Scheme Reference -->
+  <div class="scheme-ref" id="schemeRef">
+    <h3 id="schemeRefTitle">小鹤双拼 对照表</h3>
+    <div class="scheme-tables">
+      <div class="scheme-table">
+        <h4>声母对照</h4>
+        <table><tbody id="refInitials"></tbody></table>
+      </div>
+      <div class="scheme-table">
+        <h4>韵母对照</h4>
+        <table><tbody id="refFinals"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 双拼方案数据 ====================
+
+const SCHEMES = {
+  xiaohe: {
+    name: '小鹤双拼',
+    initials: {
+      b:'b', p:'p', m:'m', f:'f', d:'d', t:'t', n:'n', l:'l',
+      g:'g', k:'k', h:'h', j:'j', q:'q', x:'x',
+      zh:'v', ch:'i', sh:'u',
+      r:'r', z:'z', c:'c', s:'s', y:'y', w:'w'
+    },
+    finals: {
+      a:'a', ai:'d', an:'j', ang:'h', ao:'c',
+      e:'e', ei:'w', en:'f', eng:'g', er:'r',
+      i:'i', ia:'x', ian:'m', iang:'l', iao:'n', ie:'p', in:'b', ing:'k', iong:'s', iu:'q',
+      o:'o', ou:'z', ong:'s',
+      u:'u', ua:'x', uai:'k', uan:'r', uang:'t', ue:'t', ui:'v', un:'y', uo:'o',
+      v:'v', ve:'t', vn:'y'
+    },
+    zero: {
+      // a/e/o series: double first letter
+      a:'aa', ai:'ad', an:'aj', ang:'ah', ao:'ac',
+      e:'ee', ei:'ew', en:'ef', eng:'eg', er:'er',
+      o:'oo', ou:'oz'
+    }
+  },
+  ziranma: {
+    name: '自然码',
+    initials: {
+      b:'b', p:'p', m:'m', f:'f', d:'d', t:'t', n:'n', l:'l',
+      g:'g', k:'k', h:'h', j:'j', q:'q', x:'x',
+      zh:'v', ch:'i', sh:'u',
+      r:'r', z:'z', c:'c', s:'s', y:'y', w:'w'
+    },
+    finals: {
+      a:'a', ai:'l', an:'j', ang:'h', ao:'k',
+      e:'e', ei:'z', en:'f', eng:'g', er:'r',
+      i:'i', ia:'w', ian:'m', iang:'d', iao:'c', ie:'x', in:'n', ing:'y', iong:'s', iu:'q',
+      o:'o', ou:'b', ong:'s',
+      u:'u', ua:'w', uai:'y', uan:'r', uang:'d', ue:'t', ui:'v', un:'p', uo:'o',
+      v:'v', ve:'t', vn:'p'
+    },
+    zero: {
+      a:'aa', ai:'al', an:'aj', ang:'ah', ao:'ak',
+      e:'ee', ei:'ez', en:'ef', eng:'eg', er:'er',
+      o:'oo', ou:'ob'
+    }
+  },
+  microsoft: {
+    name: '微软双拼',
+    initials: {
+      b:'b', p:'p', m:'m', f:'f', d:'d', t:'t', n:'n', l:'l',
+      g:'g', k:'k', h:'h', j:'j', q:'q', x:'x',
+      zh:'v', ch:'i', sh:'u',
+      r:'r', z:'z', c:'c', s:'s', y:'y', w:'w'
+    },
+    finals: {
+      a:'a', ai:'l', an:'j', ang:'h', ao:'k',
+      e:'e', ei:'z', en:'f', eng:'g', er:'r',
+      i:'i', ia:'x', ian:'m', iang:'d', iao:'c', ie:'p', in:'n', ing:';', iong:'s', iu:'q',
+      o:'o', ou:'b', ong:'s',
+      u:'u', ua:'w', uai:'y', uan:'r', uang:'d', ue:'t', ui:'v', un:'p', uo:'o',
+      v:'v', ve:'t', vn:'p'
+    },
+    zero: {
+      a:'oa', ai:'ol', an:'oj', ang:'oh', ao:'ok',
+      e:'oe', ei:'oz', en:'of', eng:'og', er:'or',
+      o:'oo', ou:'ob'
+    }
+  },
+  sogou: {
+    name: '搜狗双拼',
+    initials: {
+      b:'b', p:'p', m:'m', f:'f', d:'d', t:'t', n:'n', l:'l',
+      g:'g', k:'k', h:'h', j:'j', q:'q', x:'x',
+      zh:'v', ch:'i', sh:'u',
+      r:'r', z:'z', c:'c', s:'s', y:'y', w:'w'
+    },
+    finals: {
+      a:'a', ai:'l', an:'j', ang:'h', ao:'k',
+      e:'e', ei:'z', en:'f', eng:'g', er:'r',
+      i:'i', ia:'x', ian:'m', iang:'d', iao:'c', ie:'p', in:'n', ing:';', iong:'s', iu:'q',
+      o:'o', ou:'b', ong:'s',
+      u:'u', ua:'w', uai:'y', uan:'r', uang:'d', ue:'t', ui:'v', un:'p', uo:'o',
+      v:'v', ve:'t', vn:'p'
+    },
+    zero: {
+      a:'oa', ai:'ol', an:'oj', ang:'oh', ao:'ok',
+      e:'oe', ei:'oz', en:'of', eng:'og', er:'or',
+      o:'oo', ou:'ob'
+    }
+  },
+  pinyinjj: {
+    name: '拼音加加',
+    initials: {
+      b:'b', p:'p', m:'m', f:'f', d:'d', t:'t', n:'n', l:'l',
+      g:'g', k:'k', h:'h', j:'j', q:'q', x:'x',
+      zh:'v', ch:'i', sh:'u',
+      r:'r', z:'z', c:'c', s:'s', y:'y', w:'w'
+    },
+    finals: {
+      a:'a', ai:'s', an:'f', ang:'g', ao:'d',
+      e:'e', ei:'w', en:'r', eng:'t', er:'q',
+      i:'i', ia:'b', ian:'h', iang:'k', iao:'j', ie:'m', in:'l', ing:'q', iong:'y', iu:'n',
+      o:'o', ou:'p', ong:'y',
+      u:'u', ua:'b', uai:'x', uan:'c', uang:'t', ue:'x', ui:'v', un:'z', uo:'o',
+      v:'v', ve:'x', vn:'z'
+    },
+    zero: {
+      a:'oa', ai:'os', an:'of', ang:'og', ao:'od',
+      e:'oe', ei:'ow', en:'or', eng:'ot', er:'oq',
+      o:'oo', ou:'op'
+    }
+  },
+  zhinengabc: {
+    name: '智能ABC',
+    initials: {
+      b:'b', p:'p', m:'m', f:'f', d:'d', t:'t', n:'n', l:'l',
+      g:'g', k:'k', h:'h', j:'j', q:'q', x:'x',
+      zh:'a', ch:'e', sh:'v',
+      r:'r', z:'z', c:'c', s:'s', y:'y', w:'w'
+    },
+    finals: {
+      a:'a', ai:'l', an:'j', ang:'h', ao:'k',
+      e:'e', ei:'q', en:'f', eng:'g', er:'r',
+      i:'i', ia:'d', ian:'w', iang:'t', iao:'z', ie:'x', in:'c', ing:'y', iong:'s', iu:'r',
+      o:'o', ou:'b', ong:'s',
+      u:'u', ua:'d', uai:'c', uan:'p', uang:'t', ue:'m', ui:'m', un:'n', uo:'o',
+      v:'v', ve:'m', vn:'n'
+    },
+    zero: {
+      a:'oa', ai:'ol', an:'oj', ang:'oh', ao:'ok',
+      e:'oe', ei:'oq', en:'of', eng:'og', er:'or',
+      o:'oo', ou:'ob'
+    }
+  }
+};
+
+// ==================== 拼音解析 ====================
+
+// Known initials sorted by length (longer first)
+const KNOWN_INITIALS = ['zh','ch','sh','b','p','m','f','d','t','n','l','g','k','h','j','q','x','r','z','c','s','y','w'];
+
+function parsePinyin(py) {
+  py = py.toLowerCase().replace(/[^a-z]/g, '');
+  for (const ini of KNOWN_INITIALS) {
+    if (py.startsWith(ini)) {
+      return { initial: ini, final: py.slice(ini.length) };
+    }
+  }
+  return { initial: null, final: py };
+}
+
+function getShuangpinKeys(pinyin, schemeId) {
+  const scheme = SCHEMES[schemeId];
+  if (!scheme) return null;
+  const py = pinyin.toLowerCase().replace(/[^a-z:]/g, '');
+  const parsed = parsePinyin(py);
+
+  // Check zero-initial map first
+  if (!parsed.initial && scheme.zero && scheme.zero[parsed.final]) {
+    return { keys: scheme.zero[parsed.final], initialKey: null, finalKey: null, isZero: true };
+  }
+
+  let initKey = null;
+  let finalKey = null;
+
+  if (parsed.initial) {
+    initKey = scheme.initials[parsed.initial] || null;
+  }
+  if (parsed.final) {
+    finalKey = scheme.finals[parsed.final] || null;
+  }
+
+  if (!initKey && !finalKey) return null;
+
+  // For zero-initial non-a/e/o syllables (like yi, wu, yu), the first letter acts as initial
+  if (!initKey && finalKey) {
+    // First letter of pinyin as initial
+    const firstChar = py.charAt(0);
+    if ('aeo'.includes(firstChar)) {
+      // a/e/o series handled by zero map above; fallback
+      initKey = firstChar;
+    } else {
+      initKey = firstChar;
+    }
+  }
+
+  const keys = (initKey || '') + (finalKey || '');
+  return { keys, initialKey: initKey, finalKey: finalKey, isZero: !parsed.initial };
+}
+
+// ==================== 字库 ====================
+// Format: { char: pinyin }
+const CHAR_DICT_EASY = {
+  '的':'de','一':'yi','是':'shi','在':'zai','不':'bu','了':'le','有':'you','和':'he','人':'ren','这':'zhe',
+  '中':'zhong','大':'da','为':'wei','上':'shang','个':'ge','国':'guo','我':'wo','以':'yi','要':'yao','他':'ta',
+  '时':'shi','来':'lai','用':'yong','们':'men','生':'sheng','到':'dao','作':'zuo','地':'di','于':'yu','出':'chu',
+  '会':'hui','可':'ke','也':'ye','你':'ni','对':'dui','就':'jiu','能':'neng','下':'xia','过':'guo','说':'shuo',
+  '年':'nian','小':'xiao','天':'tian','家':'jia','学':'xue','去':'qu','多':'duo','都':'dou','看':'kan','好':'hao',
+  '心':'xin','成':'cheng','前':'qian','面':'mian','日':'ri','开':'kai','头':'tou','同':'tong','三':'san','十':'shi',
+  '水':'shui','工':'gong','本':'ben','长':'chang','子':'zi','高':'gao','手':'shou','二':'er','力':'li','文':'wen',
+  '山':'shan','里':'li','明':'ming','门':'men','问':'wen','正':'zheng','名':'ming','月':'yue','知':'zhi','行':'xing',
+  '东':'dong','西':'xi','南':'nan','北':'bei','外':'wai','内':'nei','风':'feng','火':'huo','花':'hua','草':'cao',
+  '金':'jin','木':'mu','石':'shi','电':'dian','女':'nv','男':'nan','老':'lao','少':'shao','父':'fu','母':'mu'
+};
+
+const CHAR_DICT_MEDIUM = {
+  '爱':'ai','安':'an','按':'an','八':'ba','把':'ba','爸':'ba','白':'bai','百':'bai','班':'ban','半':'ban',
+  '办':'ban','帮':'bang','包':'bao','保':'bao','报':'bao','杯':'bei','北':'bei','本':'ben','比':'bi','笔':'bi',
+  '边':'bian','变':'bian','表':'biao','别':'bie','病':'bing','步':'bu','部':'bu','才':'cai','菜':'cai','参':'can',
+  '草':'cao','层':'ceng','茶':'cha','查':'cha','差':'cha','产':'chan','长':'chang','场':'chang','唱':'chang','车':'che',
+  '成':'cheng','城':'cheng','吃':'chi','重':'chong','抽':'chou','初':'chu','穿':'chuan','传':'chuan','窗':'chuang','床':'chuang',
+  '春':'chun','词':'ci','次':'ci','从':'cong','村':'cun','错':'cuo','打':'da','带':'dai','单':'dan','但':'dan',
+  '当':'dang','刀':'dao','道':'dao','得':'de','灯':'deng','等':'deng','低':'di','地':'di','点':'dian','电':'dian',
+  '店':'dian','调':'diao','定':'ding','丢':'diu','冬':'dong','动':'dong','都':'dou','读':'du','度':'du','短':'duan',
+  '段':'duan','对':'dui','顿':'dun','饿':'e','儿':'er','发':'fa','法':'fa','反':'fan','饭':'fan','方':'fang',
+  '房':'fang','放':'fang','飞':'fei','分':'fen','丰':'feng','风':'feng','否':'fou','夫':'fu','服':'fu','福':'fu',
+  '该':'gai','改':'gai','干':'gan','感':'gan','刚':'gang','高':'gao','告':'gao','哥':'ge','歌':'ge','给':'gei',
+  '根':'gen','更':'geng','工':'gong','共':'gong','狗':'gou','够':'gou','古':'gu','关':'guan','管':'guan','光':'guang',
+  '广':'guang','鬼':'gui','贵':'gui','国':'guo','果':'guo','过':'guo','还':'hai','海':'hai','害':'hai','寒':'han',
+  '汉':'han','行':'hang','好':'hao','号':'hao','喝':'he','合':'he','河':'he','黑':'hei','很':'hen','红':'hong',
+  '后':'hou','候':'hou','湖':'hu','虎':'hu','花':'hua','华':'hua','画':'hua','话':'hua','坏':'huai','欢':'huan',
+  '环':'huan','换':'huan','黄':'huang','回':'hui','会':'hui','活':'huo','火':'huo','或':'huo','机':'ji','鸡':'ji',
+  '极':'ji','几':'ji','计':'ji','记':'ji','家':'jia','间':'jian','见':'jian','件':'jian','江':'jiang','讲':'jiang',
+  '交':'jiao','角':'jiao','脚':'jiao','叫':'jiao','教':'jiao','街':'jie','节':'jie','姐':'jie','解':'jie','今':'jin',
+  '金':'jin','近':'jin','进':'jin','京':'jing','经':'jing','九':'jiu','酒':'jiu','旧':'jiu','就':'jiu','局':'ju',
+  '举':'ju','句':'ju','决':'jue','觉':'jue','军':'jun','开':'kai','看':'kan','康':'kang','考':'kao','科':'ke',
+  '可':'ke','客':'ke','课':'ke','空':'kong','口':'kou','苦':'ku','快':'kuai','块':'kuai','困':'kun','拉':'la'
+};
+
+const CHAR_DICT_HARD = {
+  '阿':'a','挨':'ai','矮':'ai','碍':'ai','岸':'an','暗':'an','昂':'ang','凹':'ao','熬':'ao','傲':'ao',
+  '拔':'ba','罢':'ba','霸':'ba','摆':'bai','败':'bai','颁':'ban','搬':'ban','板':'ban','版':'ban','扮':'ban',
+  '伴':'ban','拌':'ban','瓣':'ban','邦':'bang','绑':'bang','榜':'bang','傍':'bang','谤':'bang','胞':'bao','薄':'bao',
+  '饱':'bao','宝':'bao','抱':'bao','暴':'bao','爆':'bao','悲':'bei','碑':'bei','辈':'bei','背':'bei','贝':'bei',
+  '备':'bei','被':'bei','奔':'ben','笨':'ben','崩':'beng','蹦':'beng','逼':'bi','鼻':'bi','彼':'bi','毕':'bi',
+  '闭':'bi','碧':'bi','蔽':'bi','弊':'bi','壁':'bi','臂':'bi','避':'bi','编':'bian','鞭':'bian','扁':'bian',
+  '便':'bian','遍':'bian','辨':'bian','辩':'bian','标':'biao','彪':'biao','表':'biao','宾':'bin','滨':'bin','冰':'bing',
+  '兵':'bing','丙':'bing','柄':'bing','饼':'bing','并':'bing','拨':'bo','波':'bo','玻':'bo','剥':'bo','播':'bo',
+  '伯':'bo','驳':'bo','泊':'bo','勃':'bo','博':'bo','搏':'bo','薄':'bo','补':'bu','捕':'bu','布':'bu',
+  '怖':'bu','猜':'cai','材':'cai','裁':'cai','采':'cai','彩':'cai','踩':'cai','蔡':'cai','参':'can','餐':'can',
+  '残':'can','蚕':'can','惨':'can','灿':'can','仓':'cang','苍':'cang','舱':'cang','藏':'cang','操':'cao','槽':'cao',
+  '册':'ce','侧':'ce','测':'ce','策':'ce','层':'ceng','曾':'ceng','叉':'cha','插':'cha','查':'cha','察':'cha',
+  '差':'cha','拆':'chai','柴':'chai','缠':'chan','蝉':'chan','产':'chan','阐':'chan','颤':'chan','昌':'chang','猖':'chang',
+  '尝':'chang','常':'chang','偿':'chang','厂':'chang','畅':'chang','倡':'chang','唱':'chang','抄':'chao','超':'chao','巢':'chao',
+  '朝':'chao','潮':'chao','吵':'chao','炒':'chao','扯':'che','彻':'che','撤':'che','尘':'chen','沉':'chen','陈':'chen',
+  '衬':'chen','称':'cheng','撑':'cheng','呈':'cheng','诚':'cheng','承':'cheng','乘':'cheng','程':'cheng','惩':'cheng','澄':'cheng',
+  '逞':'cheng','秤':'cheng','痴':'chi','池':'chi','驰':'chi','迟':'chi','持':'chi','尺':'chi','齿':'chi','耻':'chi',
+  '斥':'chi','赤':'chi','翅':'chi','充':'chong','冲':'chong','崇':'chong','宠':'chong','抽':'chou','仇':'chou','绸':'chou',
+  '畴':'chou','酬':'chou','稠':'chou','愁':'chou','筹':'chou','丑':'chou','臭':'chou','初':'chu','除':'chu','厨':'chu',
+  '础':'chu','储':'chu','楚':'chu','处':'chu','触':'chu','揣':'chuai','川':'chuan','穿':'chuan','传':'chuan','船':'chuan',
+  '喘':'chuan','串':'chuan','疮':'chuang','窗':'chuang','床':'chuang','闯':'chuang','创':'chuang','吹':'chui','炊':'chui','垂':'chui',
+  '锤':'chui','春':'chun','纯':'chun','唇':'chun','淳':'chun','醇':'chun','蠢':'chun','戳':'chuo','绰':'chuo','慈':'ci',
+  '磁':'ci','雌':'ci','辞':'ci','此':'ci','刺':'ci','赐':'ci','匆':'cong','聪':'cong','丛':'cong','凑':'cou',
+  '粗':'cu','促':'cu','醋':'cu','窜':'cuan','篡':'cuan','催':'cui','摧':'cui','脆':'cui','翠':'cui','村':'cun',
+  '存':'cun','寸':'cun','措':'cuo','错':'cuo','搭':'da','达':'da','答':'da','打':'da','呆':'dai','代':'dai',
+  '带':'dai','待':'dai','贷':'dai','袋':'dai','逮':'dai','戴':'dai','丹':'dan','担':'dan','单':'dan','耽':'dan'
+};
+
+// Merge all char dicts
+const CHAR_DICT = { ...CHAR_DICT_EASY, ...CHAR_DICT_MEDIUM, ...CHAR_DICT_HARD };
+
+// Word library
+const WORD_LIBRARY = {
+  easy: [
+    ['中国','zhong guo'],['大家','da jia'],['我们','wo men'],['他们','ta men'],
+    ['学习','xue xi'],['工作','gong zuo'],['生活','sheng huo'],['时间','shi jian'],
+    ['今天','jin tian'],['明天','ming tian'],['昨天','zuo tian'],['现在','xian zai'],
+    ['知道','zhi dao'],['可以','ke yi'],['因为','yin wei'],['所以','suo yi'],
+    ['如果','ru guo'],['虽然','sui ran'],['但是','dan shi'],['而且','er qie'],
+    ['东西','dong xi'],['事情','shi qing'],['地方','di fang'],['时候','shi hou'],
+    ['朋友','peng you'],['同学','tong xue'],['老师','lao shi'],['学生','xue sheng'],
+    ['吃饭','chi fan'],['喝水','he shui'],['看书','kan shu'],['写字','xie zi'],
+    ['电话','dian hua'],['电脑','dian nao'],['手机','shou ji'],['电视','dian shi'],
+    ['天气','tian qi'],['春天','chun tian'],['夏天','xia tian'],['秋天','qiu tian'],
+    ['冬天','dong tian'],['高兴','gao xing'],['快乐','kuai le'],['幸福','xing fu'],
+    ['美丽','mei li'],['漂亮','piao liang'],['可爱','ke ai'],['聪明','cong ming'],
+  ],
+  medium: [
+    ['世界','shi jie'],['历史','li shi'],['文化','wen hua'],['艺术','yi shu'],
+    ['科学','ke xue'],['技术','ji shu'],['经济','jing ji'],['政治','zheng zhi'],
+    ['社会','she hui'],['国家','guo jia'],['政府','zheng fu'],['法律','fa lv'],
+    ['教育','jiao yu'],['医学','yi xue'],['环境','huan jing'],['自然','zi ran'],
+    ['资源','zi yuan'],['能源','neng yuan'],['交通','jiao tong'],['信息','xin xi'],
+    ['网络','wang luo'],['数据','shu ju'],['软件','ruan jian'],['系统','xi tong'],
+    ['管理','guan li'],['服务','fu wu'],['产品','chan pin'],['市场','shi chang'],
+    ['公司','gong si'],['企业','qi ye'],['行业','hang ye'],['职业','zhi ye'],
+    ['任务','ren wu'],['目标','mu biao'],['计划','ji hua'],['结果','jie guo'],
+    ['方法','fang fa'],['经验','jing yan'],['知识','zhi shi'],['能力','neng li'],
+    ['机会','ji hui'],['挑战','tiao zhan'],['成功','cheng gong'],['失败','shi bai'],
+    ['改变','gai bian'],['发展','fa zhan'],['进步','jin bu'],['创新','chuang xin'],
+    ['传统','chuan tong'],['现代','xian dai'],['未来','wei lai'],['梦想','meng xiang'],
+  ],
+  hard: [
+    ['哲学','zhe xue'],['逻辑','luo ji'],['辩证','bian zheng'],['抽象','chou xiang'],
+    ['战略','zhan lve'],['宏观','hong guan'],['微观','wei guan'],['机制','ji zhi'],
+    ['结构','jie gou'],['模式','mo shi'],['框架','kuang jia'],['范式','fan shi'],
+    ['维度','wei du'],['层次','ceng ci'],['领域','ling yu'],['范畴','fan chou'],
+    ['本质','ben zhi'],['现象','xian xiang'],['规律','gui lv'],['原理','yuan li'],
+    ['意识','yi shi'],['认知','ren zhi'],['思维','si wei'],['智慧','zhi hui'],
+    ['境界','jing jie'],['修养','xiu yang'],['情操','qing cao'],['品格','pin ge'],
+    ['尊严','zun yan'],['荣誉','rong yu'],['责任','ze ren'],['使命','shi ming'],
+    ['贡献','gong xian'],['奉献','feng xian'],['牺牲','xi sheng'],['奋斗','fen dou'],
+    ['卓越','zhuo yue'],['杰出','jie chu'],['辉煌','hui huang'],['璀璨','cui can'],
+    ['严谨','yan jin'],['细致','xi zhi'],['缜密','zhen mi'],['深邃','shen sui'],
+    ['渊博','yuan bo'],['精湛','jing zhan'],['娴熟','xian shu'],['精通','jing tong'],
+    ['酝酿','yun niang'],['斟酌','zhen zhuo'],['揣摩','chuai mo'],['权衡','quan heng']
+  ]
+};
+
+// Fix the hard words array - some entries used wrong format
+WORD_LIBRARY.hard = WORD_LIBRARY.hard.filter(w => {
+  if (!Array.isArray(w)) return false;
+  return w.length === 2 && typeof w[0] === 'string' && typeof w[1] === 'string';
+});
+
+// Sentence library
+const SENTENCE_LIBRARY = {
+  easy: [
+    '今天天气真好。',
+    '我喜欢学习中文。',
+    '大家一起吃饭吧。',
+    '这本书很有意思。',
+    '明天我们去公园。',
+    '他是我最好的朋友。',
+    '小猫很可爱。',
+    '请你喝杯水。',
+    '老师说得很对。',
+    '周末我想去看电影。',
+    '春天来了花儿开了。',
+    '爸爸妈妈我爱你们。',
+    '这个苹果很好吃。',
+    '放学后我们一起走。',
+    '阳光明媚的一天。',
+  ],
+  medium: [
+    '知识就是力量，学习永无止境。',
+    '现代社会信息发展非常迅速。',
+    '我们应该保护环境爱护自然。',
+    '科学技术改变了人们的生活。',
+    '互联网让世界变得更加紧密。',
+    '成功需要努力也需要正确的方法。',
+    '历史是一面镜子可以照亮未来。',
+    '音乐能给人们带来快乐和感动。',
+    '旅行让我们看到更广阔的世界。',
+    '好的习惯会让人受益终生。',
+    '创新是社会进步的重要动力。',
+    '教育是改变命运的最好方式。',
+    '每个人都有自己的独特价值。',
+    '时间是最宝贵的资源之一。',
+    '团队合作能够产生更大的力量。',
+  ],
+  hard: [
+    '哲学思考帮助我们理解世界的本质和规律。',
+    '辩证思维要求我们从多个角度看待问题。',
+    '技术创新需要深厚的基础研究和跨学科协作。',
+    '生态文明建设是人类可持续发展的必由之路。',
+    '文化传承与创新是一个民族永葆活力的关键。',
+    '在信息爆炸的时代，独立思考能力弥足珍贵。',
+    '复杂系统的涌现性质往往超出个体的认知边界。',
+    '认知科学揭示了人类思维和决策的深层机制。',
+    '全球化背景下的多元文化融合面临机遇与挑战。',
+    '量子计算有望在药物研发和材料科学领域实现突破。',
+    '人工智能伦理问题需要社会各界共同参与讨论。',
+    '从历史中汲取智慧才能更好地谋划未来的方向。',
+    '真正的自由源于对自身和世界的深刻理解。',
+    '精益求精的工匠精神是高质量发展的内在要求。',
+    '宇宙的浩瀚无垠激发了人类探索未知的永恒热情。',
+  ]
+};
+
+// ==================== 应用状态 ====================
+let state = {
+  schemeId: 'xiaohe',
+  mode: 'char',
+  level: 'easy',
+  items: [],        // Array of practice items (chars/words for word mode)
+  currentIndex: 0,
+  currentCharIndex: 0, // For word mode: which char in current word
+  typedKeys: '',     // Keys typed for current character
+  totalCorrect: 0,
+  totalAttempts: 0,
+  currentCombo: 0,
+  maxCombo: 0,
+  totalKeystrokes: 0,
+  startTime: null,
+  isActive: false,
+};
+
+// ==================== 工具函数 ====================
+
+function getSentenceChars(sentence) {
+  // Convert sentence to array of characters, split pinyin for each
+  const chars = [];
+  for (const ch of sentence) {
+    if (/[\u4e00-\u9fff]/.test(ch)) {
+      const py = CHAR_DICT[ch];
+      if (py) {
+        chars.push({ char: ch, pinyin: py });
+      }
+    } else if (/[a-zA-Z0-9]/.test(ch)) {
+      chars.push({ char: ch, pinyin: ch.toLowerCase() });
+    }
+    // Skip punctuation in practice but count as done
+  }
+  return chars;
+}
+
+function generateItems(mode, level) {
+  const items = [];
+  _generateInto(items, mode, level);
+  return items;
+}
+
+function _generateInto(items, mode, level) {
+  if (mode === 'char') {
+    let pool;
+    if (level === 'easy') pool = Object.entries(CHAR_DICT_EASY);
+    else if (level === 'medium') pool = Object.entries([...Object.entries(CHAR_DICT_EASY), ...Object.entries(CHAR_DICT_MEDIUM)]);
+    else pool = Object.entries(CHAR_DICT);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    for (const [ch, py] of shuffled) {
+      items.push({ char: ch, pinyin: py });
+    }
+  } else if (mode === 'word') {
+    const pool = WORD_LIBRARY[level] || WORD_LIBRARY.medium;
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    for (const [word, pinyinStr] of shuffled) {
+      const pinyins = pinyinStr.split(' ');
+      const chars = [];
+      for (let j = 0; j < word.length; j++) {
+        chars.push({ char: word[j], pinyin: pinyins[j] || CHAR_DICT[word[j]] || '' });
+      }
+      items.push({ word, pinyins, chars });
+    }
+  } else if (mode === 'sentence') {
+    const pool = SENTENCE_LIBRARY[level] || SENTENCE_LIBRARY.medium;
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    for (const sentence of shuffled) {
+      const chars = getSentenceChars(sentence);
+      items.push({ sentence, chars });
+    }
+  }
+}
+
+// 当练习池用完时，重新洗牌生成一批追加到末尾
+function replenishItems() {
+  _generateInto(state.items, state.mode, state.level);
+}
+
+function getCurrentItem() {
+  return state.items[state.currentIndex] || null;
+}
+
+function getCurrentChar() {
+  const item = getCurrentItem();
+  if (!item) return null;
+  if (state.mode === 'char') {
+    return item;
+  }
+  // word or sentence: use chars array
+  if (item.chars && state.currentCharIndex < item.chars.length) {
+    return item.chars[state.currentCharIndex];
+  }
+  return null;
+}
+
+// ==================== UI 更新 ====================
+
+function updateStats() {
+  const accuracy = state.totalAttempts > 0
+    ? Math.round((state.totalCorrect / state.totalAttempts) * 100) + '%'
+    : '-';
+  document.getElementById('accuracy').textContent = accuracy;
+
+  if (state.startTime && state.totalCorrect > 0) {
+    const elapsed = (Date.now() - state.startTime) / 60000; // minutes
+    const wpm = Math.round(state.totalCorrect / Math.max(elapsed, 0.1));
+    document.getElementById('speed').textContent = wpm;
+  } else {
+    document.getElementById('speed').textContent = '-';
+  }
+
+  document.getElementById('combo').textContent = state.currentCombo > 0 ? state.currentCombo : '-';
+  document.getElementById('totalTyped').textContent = state.totalAttempts;
+}
+
+function updateProgress() {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = '已练习 ' + state.totalAttempts + ' 字';
+}
+
+function renderCurrentItem() {
+  const item = getCurrentItem();
+  const charData = getCurrentChar();
+
+  document.getElementById('wordProgress').innerHTML = '';
+  document.getElementById('currentPinyin').textContent = '';
+  document.getElementById('hintText').textContent = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('typedKeys').innerHTML = '';
+
+  if (!item) {
+    document.getElementById('charDisplay').textContent = '准备好了吗？';
+    document.getElementById('charDisplay').className = 'char-display';
+    document.getElementById('pinyinDisplay').textContent = '';
+    document.getElementById('hintText').textContent = '选择方案后按任意键开始';
+    return;
+  }
+
+  if (state.mode === 'char') {
+    document.getElementById('charDisplay').textContent = item.char;
+    document.getElementById('charDisplay').className = 'char-display';
+    document.getElementById('pinyinDisplay').textContent = item.pinyin;
+    document.getElementById('hintText').textContent = '请输入对应的双拼按键';
+  } else {
+    // Word or sentence mode: show all chars with progress
+    const allChars = item.chars || [];
+    const progressDiv = document.getElementById('wordProgress');
+
+    for (let i = 0; i < allChars.length; i++) {
+      const span = document.createElement('span');
+      span.className = 'word-char';
+      span.textContent = allChars[i].char;
+      if (i < state.currentCharIndex) span.classList.add('done');
+      else if (i === state.currentCharIndex) span.classList.add('current');
+      progressDiv.appendChild(span);
+    }
+
+    if (item.sentence) {
+      document.getElementById('charDisplay').textContent = item.sentence;
+    } else if (item.word) {
+      document.getElementById('charDisplay').textContent = item.word;
+    }
+    document.getElementById('charDisplay').className = 'char-display';
+
+    if (charData) {
+      document.getElementById('pinyinDisplay').textContent = charData.pinyin;
+      document.getElementById('currentPinyin').textContent =
+        '当前音节: ' + charData.pinyin + '（第 ' + (state.currentCharIndex + 1) + '/' + allChars.length + ' 字）';
+      document.getElementById('hintText').textContent = '请输入当前字的双拼按键';
+    }
+  }
+
+  // 预先显示当前音节的目标按键提示（空框占位）
+  if (charData) {
+    const spInfo = getShuangpinKeys(charData.pinyin, state.schemeId);
+    if (spInfo) {
+      renderTypedKeys('', spInfo.keys, null);
+    }
+  }
+}
+
+function renderTypedKeys(keys, targetKeys, status) {
+  const container = document.getElementById('typedKeys');
+  container.innerHTML = '';
+
+  const maxLen = Math.max(keys.length, (targetKeys || '').length);
+  for (let i = 0; i < maxLen; i++) {
+    const badge = document.createElement('span');
+    badge.className = 'key-badge';
+    if (i < keys.length) {
+      badge.textContent = keys[i];
+      if (status === 'correct') badge.classList.add('correct');
+      else if (status === 'wrong') badge.classList.add('wrong');
+      else badge.classList.add('active');
+    } else {
+      badge.textContent = targetKeys ? targetKeys[i] : '';
+    }
+    container.appendChild(badge);
+  }
+}
+
+function showFeedback(msg, type) {
+  const fb = document.getElementById('feedback');
+  fb.textContent = msg;
+  fb.className = 'feedback ' + type;
+  setTimeout(() => {
+    if (fb.textContent === msg) {
+      fb.textContent = '';
+      fb.className = 'feedback';
+    }
+  }, 1200);
+}
+
+// ==================== 键盘渲染 ====================
+
+const KEYBOARD_LAYOUT = [
+  ['`','1','2','3','4','5','6','7','8','9','0','-','='],
+  ['Tab','q','w','e','r','t','y','u','i','o','p','[',']','\\'],
+  ['Caps','a','s','d','f','g','h','j','k','l',';',"'",'Enter'],
+  ['Shift','z','x','c','v','b','n','m',',','.','/','Shift'],
+  ['Ctrl','Win','Alt','Space','Alt','Win','Ctrl']
+];
+
+function getKeyMapping(schemeId) {
+  const scheme = SCHEMES[schemeId];
+  if (!scheme) return {};
+
+  const mapping = {}; // key -> { initials: [], finals: [] }
+
+  for (const [sp, key] of Object.entries(scheme.initials)) {
+    if (!mapping[key]) mapping[key] = { initials: [], finals: [] };
+    if (!mapping[key].initials.includes(sp)) mapping[key].initials.push(sp);
+  }
+  for (const [sp, key] of Object.entries(scheme.finals)) {
+    if (!mapping[key]) mapping[key] = { initials: [], finals: [] };
+    if (!mapping[key].finals.includes(sp)) mapping[key].finals.push(sp);
+  }
+
+  return mapping;
+}
+
+function renderKeyboard(schemeId) {
+  const mapping = getKeyMapping(schemeId);
+  const keyboardDiv = document.getElementById('keyboard');
+  document.getElementById('keyboardSchemeName').textContent = SCHEMES[schemeId]?.name || '';
+
+  let html = '';
+  for (const row of KEYBOARD_LAYOUT) {
+    html += '<div class="key-row">';
+    for (const keyName of row) {
+      const keyLower = keyName.toLowerCase();
+      const info = mapping[keyLower];
+
+      let extraClass = '';
+      if (info) {
+        if (info.initials.length > 0 && info.finals.length > 0) extraClass = 'sp-both';
+        else if (info.initials.length > 0) extraClass = 'sp-init';
+        else if (info.finals.length > 0) extraClass = 'sp-final';
+      }
+
+      // Width classes
+      if (['Tab','Caps','Shift','Enter','Ctrl','Alt','Win','Space'].includes(keyName)) {
+        if (keyName === 'Space') extraClass += ' key-xwide';
+        else if (keyName === 'Shift') extraClass += ' key-wide';
+        else if (keyName === 'Enter') extraClass += ' key-wide';
+        else extraClass += ' key-wide';
+      }
+
+      let spLabel = '';
+      if (info && info.initials.length > 0) {
+        spLabel += info.initials.join('/');
+      }
+      if (info && info.finals.length > 0) {
+        if (spLabel) spLabel += ' ';
+        spLabel += info.finals.join('/');
+      }
+
+      const displayLabel = keyName === 'Space' ? '空格' : keyName;
+
+      html += '<div class="key ' + extraClass + '" data-key="' + keyLower + '">';
+      html += '<span class="key-main">' + displayLabel + '</span>';
+      if (spLabel) {
+        html += '<span class="key-sp">' + spLabel + '</span>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  keyboardDiv.innerHTML = html;
+}
+
+function highlightKeyboardKey(keyChar, className) {
+  // Remove all highlights first
+  const allKeys = document.querySelectorAll('.key');
+  allKeys.forEach(k => {
+    k.classList.remove('highlight-init', 'highlight-final', 'highlight-correct', 'highlight-wrong');
+  });
+  if (keyChar && className) {
+    const keyEl = document.querySelector('.key[data-key="' + keyChar.toLowerCase() + '"]');
+    if (keyEl) keyEl.classList.add(className);
+  }
+}
+
+// ==================== 方案对照表 ====================
+
+function renderSchemeRef(schemeId) {
+  const scheme = SCHEMES[schemeId];
+  if (!scheme) return;
+
+  document.getElementById('schemeRefTitle').textContent = scheme.name + ' 对照表';
+
+  // Initials table
+  let initHtml = '';
+  const initEntries = Object.entries(scheme.initials);
+  for (let i = 0; i < initEntries.length; i += 4) {
+    initHtml += '<tr>';
+    for (let j = i; j < i + 4 && j < initEntries.length; j++) {
+      initHtml += '<td>' + initEntries[j][0] + '</td><td class="sp-cell">' + initEntries[j][1] + '</td>';
+    }
+    initHtml += '</tr>';
+  }
+  document.getElementById('refInitials').innerHTML = initHtml;
+
+  // Finals table
+  let finalHtml = '';
+  const finalEntries = Object.entries(scheme.finals);
+  for (let i = 0; i < finalEntries.length; i += 4) {
+    finalHtml += '<tr>';
+    for (let j = i; j < i + 4 && j < finalEntries.length; j++) {
+      finalHtml += '<td>' + finalEntries[j][0] + '</td><td class="sp-cell">' + finalEntries[j][1] + '</td>';
+    }
+    finalHtml += '</tr>';
+  }
+  document.getElementById('refFinals').innerHTML = finalHtml;
+}
+
+// ==================== 核心逻辑 ====================
+
+function startSession() {
+  state.items = generateItems(state.mode, state.level);
+  state.currentIndex = 0;
+  state.currentCharIndex = 0;
+  state.typedKeys = '';
+  state.totalCorrect = 0;
+  state.totalAttempts = 0;
+  state.currentCombo = 0;
+  state.maxCombo = 0;
+  state.totalKeystrokes = 0;
+  state.startTime = Date.now();
+  state.isActive = true;
+  updateStats();
+  updateProgress();
+  renderCurrentItem();
+  highlightKeyboardKey(null, null);
+  // Focus hint
+  document.getElementById('practiceArea').focus();
+}
+
+function advanceToNext() {
+  const item = getCurrentItem();
+  if (!item) return;
+
+  if (state.mode === 'char') {
+    state.currentIndex++;
+    if (state.currentIndex >= state.items.length) {
+      replenishItems();
+    }
+    state.typedKeys = '';
+    renderCurrentItem();
+    updateProgress();
+  } else {
+    // Word or sentence mode
+    state.currentCharIndex++;
+    if (state.currentCharIndex >= item.chars.length) {
+      // Move to next word/sentence
+      state.currentIndex++;
+      state.currentCharIndex = 0;
+      if (state.currentIndex >= state.items.length) {
+        replenishItems();
+      }
+    }
+    state.typedKeys = '';
+    renderCurrentItem();
+    updateProgress();
+  }
+}
+
+function handleKeystroke(key) {
+  if (!state.isActive) {
+    // Start if not active
+    if (key.length === 1 && /^[a-zA-Z;,./\[\]\\\-='`]$/.test(key)) {
+      startSession();
+      // 启动键仅用于开始练习，不计入打字输入
+    }
+    return;
+  }
+
+  if (key.length === 1 && /^[a-zA-Z;,./\[\]\\\-='`]$/.test(key)) {
+    processKeyStroke(key.toLowerCase());
+  }
+}
+
+function processKeyStroke(key) {
+  const charData = getCurrentChar();
+  if (!charData) return;
+
+  const spInfo = getShuangpinKeys(charData.pinyin, state.schemeId);
+  if (!spInfo) {
+    // Can't parse, skip
+    showFeedback('未找到该音节的映射', 'wrong');
+    setTimeout(advanceToNext, 600);
+    return;
+  }
+
+  const targetKeys = spInfo.keys;
+
+  // 双拼每个字固定两个字母，已输入足够则忽略后续按键
+  if (state.typedKeys.length >= targetKeys.length) return;
+
+  state.typedKeys += key;
+
+  // Highlight keyboard
+  if (state.typedKeys.length <= targetKeys.length) {
+    const pos = state.typedKeys.length;
+    if (pos === 1 && spInfo.initialKey) {
+      highlightKeyboardKey(spInfo.initialKey, 'highlight-init');
+    } else if (pos === 2 && spInfo.finalKey) {
+      highlightKeyboardKey(spInfo.finalKey, 'highlight-final');
+    }
+  }
+
+  renderTypedKeys(state.typedKeys, targetKeys, null);
+
+  // Check if we have enough keys
+  if (state.typedKeys.length >= targetKeys.length) {
+    // Check correctness
+    const isCorrect = state.typedKeys === targetKeys;
+    state.totalAttempts++;
+    state.totalKeystrokes += state.typedKeys.length;
+
+    if (isCorrect) {
+      state.totalCorrect++;
+      state.currentCombo++;
+      if (state.currentCombo > state.maxCombo) state.maxCombo = state.currentCombo;
+      renderTypedKeys(state.typedKeys, targetKeys, 'correct');
+      highlightKeyboardKey(null, 'highlight-correct');
+      document.getElementById('charDisplay').classList.add('correct');
+      showFeedback('正确！' + charData.pinyin + ' → ' + targetKeys, 'correct');
+    } else {
+      state.currentCombo = 0;
+      renderTypedKeys(state.typedKeys, targetKeys, 'wrong');
+      highlightKeyboardKey(null, 'highlight-wrong');
+      document.getElementById('charDisplay').classList.add('wrong');
+      showFeedback('错误！应为: ' + targetKeys + '（你输入了: ' + state.typedKeys + '）', 'wrong');
+    }
+
+    updateStats();
+
+    setTimeout(() => {
+      document.getElementById('charDisplay').classList.remove('correct', 'wrong');
+      highlightKeyboardKey(null, null);
+      advanceToNext();
+    }, isCorrect ? 400 : 800);
+  }
+}
+
+function handleBackspace() {
+  if (!state.isActive) return;
+  if (state.typedKeys.length > 0) {
+    state.typedKeys = state.typedKeys.slice(0, -1);
+    const charData = getCurrentChar();
+    if (charData) {
+      const spInfo = getShuangpinKeys(charData.pinyin, state.schemeId);
+      if (spInfo) {
+        renderTypedKeys(state.typedKeys, spInfo.keys, null);
+        // Re-highlight
+        if (state.typedKeys.length === 1 && spInfo.initialKey) {
+          highlightKeyboardKey(spInfo.initialKey, 'highlight-init');
+        } else {
+          highlightKeyboardKey(null, null);
+        }
+      }
+    }
+  }
+}
+
+// ==================== 事件监听 ====================
+
+document.addEventListener('keydown', (e) => {
+  // Don't capture when typing in inputs/selects
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    handleBackspace();
+    return;
+  }
+
+  // Ignore modifier keys and function keys
+  if (e.ctrlKey || e.altKey || e.metaKey || e.key.length > 1) return;
+
+  e.preventDefault();
+  handleKeystroke(e.key);
+});
+
+document.getElementById('schemeSelect').addEventListener('change', (e) => {
+  state.schemeId = e.target.value;
+  renderKeyboard(state.schemeId);
+  renderSchemeRef(state.schemeId);
+  if (state.isActive) startSession();
+});
+
+document.getElementById('modeSelect').addEventListener('change', (e) => {
+  state.mode = e.target.value;
+  startSession();
+});
+
+document.getElementById('levelSelect').addEventListener('change', (e) => {
+  state.level = e.target.value;
+  startSession();
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  startSession();
+});
+
+document.getElementById('toggleRef').addEventListener('click', () => {
+  const ref = document.getElementById('schemeRef');
+  ref.classList.toggle('show');
+  document.getElementById('toggleRef').textContent =
+    ref.classList.contains('show') ? '隐藏对照表' : '方案对照表';
+});
+
+// Click on practice area to focus
+document.getElementById('practiceArea').addEventListener('click', () => {
+  document.getElementById('practiceArea').focus();
+});
+
+// ==================== 初始化 ====================
+
+function init() {
+  renderKeyboard('xiaohe');
+  renderSchemeRef('xiaohe');
+
+  // Set initial state
+  document.getElementById('charDisplay').textContent = '准备好了吗？';
+  document.getElementById('pinyinDisplay').textContent = '';
+  document.getElementById('hintText').textContent = '选择方案和模式后，按任意键开始练习';
+}
+
+init();
+</script>
+</body>
+</html>
