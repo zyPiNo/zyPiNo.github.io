@@ -1,15 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1995713322669760" crossorigin="anonymous">
     </script>
-    <title>hello</title>
+    <title>我的工具箱</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f0f2f5;
+            color: #1e293b;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 32px 0 48px;
+        }
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: 3px;
+        }
+        .header .subtitle {
+            font-size: 15px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        /* Navigation Cards */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .nav-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 28px 24px;
+            border: 1px solid #e2e8f0;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+        .nav-card:hover {
+            border-color: #4361ee;
+            box-shadow: 0 2px 12px rgba(67, 97, 238, 0.10);
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: #eef0ff;
+            color: #4361ee;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 18px;
+            flex: 1;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #4361ee;
+            align-self: flex-start;
+        }
+        .card-link::after {
+            content: '→';
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        .nav-card:hover .card-link::after {
+            transform: translateX(3px);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 56px;
+            padding: 20px 0;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #64748b;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #4361ee;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container { padding: 24px 16px; }
+            .header { padding: 20px 0 32px; }
+            .header h1 { font-size: 24px; }
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .nav-card { padding: 22px 18px; }
+        }
+    </style>
 </head>
 <body>
-    <div>
-        <h1>Hello World</h1>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>我的工具箱</h1>
+            <p class="subtitle">实用在线小工具集合</p>
+        </div>
+
+        <!-- Navigation Cards -->
+        <div class="nav-grid">
+            <!-- 双拼打字练习 -->
+            <a class="nav-card" href="shuangpin-practice/index.html">
+                <div class="card-icon">⌨</div>
+                <div class="card-title">双拼打字练习</div>
+                <div class="card-desc">支持小鹤、自然码、微软等多套双拼方案，单字、词语、句子三种练习模式，配合虚拟键盘实时反馈。</div>
+                <span class="card-link">进入工具</span>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>更多工具即将上线</p>
+        </div>
     </div>
 </body>
 </html>
